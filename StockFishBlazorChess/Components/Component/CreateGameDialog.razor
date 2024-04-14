@@ -1,0 +1,18 @@
+﻿<MudDialog>
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			Create game
+		</MudText>
+	</TitleContent>
+	<DialogContent>
+		<MudGrid>
+			<MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
+				<MudTextField Label="Game identifier" @bind-Value="@gameName"></MudTextField>
+			</MudItem>
+		</MudGrid>
+	</DialogContent>
+	<DialogActions>
+		<MudButton Variant="Variant.Filled" OnClick="cancel" Color="Color.Info">Bezár</MudButton>
+		<MudButton Variant="Variant.Filled" OnClick="create" Color="Color.Primary">Mentés</MudButton>
+	</DialogActions>
+</MudDialog>

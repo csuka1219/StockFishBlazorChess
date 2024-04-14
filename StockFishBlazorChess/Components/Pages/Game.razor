@@ -1,0 +1,54 @@
+﻿@page "/game/{gameName}"
+@using StockFishBlazorChess.Data;
+@using StockFishBlazorChess.Pieces;
+@using StockFishBlazorChess.Utilities
+
+<MudGrid>
+    <MudItem Style="@getPlayerTableView()" xs="12" sm="12" md="6" lg="6" xl="6" xxl="6">
+        <MudDropContainer T="Piece" Style="max-width: 515px; margin: auto auto;" @ref="chessGameService._container" Items="@chessGameService.piecesOnBoard" CanDropClass="mud-border-info" NoDropClass="mud-border-error"
+                          CanDrop="@( (item,identifier ) => chessGameService.canMovePiece(item,identifier))"
+            ItemsSelector="@((item,dropzone) => item.Position == dropzone)" ItemDropped="pieceUpdated" 
+            Class="border-2 border-solid mud-border-lines-default">
+            <ChildContent>           
+                @for (int r = 0; r < 8; r++)
+                {
+                    string row = r.ToString();
+                    <div class="d-flex">
+                    @for (int c = 0; c < 8; c++)
+                    {
+                        string col = c.ToString();
+                        <MudDropZone T="Piece" Identifier="@($"{row}{col}")" DraggingClass="mud-theme-success" Class="d-flex justify-center align-center border-2 border-solid docs-gray-bg mud-border-lines-default" Style="@getCellCss(r+c)"/>
+                    }
+                    </div>
+                }
+            </ChildContent>
+            <ItemRenderer>
+                <div class="d-flex justify-center align-center flex-grow-1" style="@getPlayerPieceView()">
+                    <img src="@context.Icon" style="width: 100%; padding-top: 5px;" alt="Icon" />
+
+                </div>
+            </ItemRenderer>
+        </MudDropContainer>
+    </MudItem>
+
+    <MudItem xs="12" sm="12" md="6" lg="6" xl="6" xxl="6">
+        <MudPaper Width="75%" Style="margin-left:auto; margin-right:auto">
+            <div style="max-height: 50% !important; height: 300px; overflow-y: auto;">
+                <MudList Dense>
+                    <MudGrid Style="width: 100%">
+                        @foreach (PieceChange item in chessGameService.pieceChanges)
+                        {
+                            <MudItem Style="width:100%; padding-top: 2px; padding-bottom: 2px" xs="6" sm="6" md="6" lg="6" xl="6" xxl="6">
+                                <MudListItem Style="padding-top: 0px; padding-bottom: 0px;">
+                                    <MudText Align="Align.Left" Typo="Typo.h6">@ChessNotationConverter.convertMoveToString(item)</MudText>
+                                </MudListItem>
+                                <MudDivider Vertical="true" FlexItem="true" />
+                                <MudDivider />
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </MudList>
+            </div>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
