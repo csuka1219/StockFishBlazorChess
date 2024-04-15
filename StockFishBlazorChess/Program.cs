@@ -2,6 +2,8 @@ using Blazored.LocalStorage;
 using MudBlazor.Services;
 using StockFishBlazorChess.Components;
 using StockFishBlazorChess.Handlers;
+using StockFishBlazorChess.Interfaces;
+using StockFishBlazorChess.Services;
 
 namespace StockFishBlazorChess
 {
@@ -19,6 +21,7 @@ namespace StockFishBlazorChess
             builder.Services.AddBlazoredLocalStorage();
 
             builder.Services.AddSingleton<IUserHandler, UserHandler>();
+            builder.Services.AddSingleton<IMatchManager, MatchManager>();
 
             var app = builder.Build();
 

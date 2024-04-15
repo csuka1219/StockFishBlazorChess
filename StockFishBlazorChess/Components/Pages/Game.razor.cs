@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using System.Data;
 using System.Xml;
-using StockFishBlazorChess.Handlers;
 using StockFishBlazorChess.Utilities;
+using StockFishBlazorChess.Interfaces;
 
 namespace StockFishBlazorChess.Components.Pages
 {
@@ -23,21 +23,26 @@ namespace StockFishBlazorChess.Components.Pages
         [Inject]
 		private NavigationManager navigationManager { get; set; } = default!;
         [Inject]
-        private IUserHandler userHandler { get; set; } = default!;
+        private IUserHandler userHandler { get; set; }
+        [Inject]
+        private IMatchManager matchManager { get; set; }
 
         [Parameter]
-        public string gameName { get; set; } = string.Empty;
+        public string difficulty { get; set; } = string.Empty;
 
 
         private ChessGameService chessGameService = new ChessGameService();
         private StockfishService stockfishService = new StockfishService();
         private Stockfish stockfish = default!;
+        private string? uniqueGuid;
 
         protected override async Task OnInitializedAsync()
         {
             stockfishService.startEngine();
             stockfish = new Stockfish(stockfishService);
-            stockfish.setDifficulty(1320);
+            stockfish.setDifficulty(Convert.ToInt32(difficulty));
+            // Retrieve the unique GUID from local storage
+            uniqueGuid = await localStorage.GetItemAsync<string>("uniqueGuid");
             //string bestMove = stockfish.getNextMove();
             int b = 0;
         }
@@ -54,7 +59,7 @@ namespace StockFishBlazorChess.Components.Pages
 
         private async void pieceUpdated(MudItemDropInfo<Piece> piece)
         {
-            chessGameService.movePiece(piece, gameName);
+            chessGameService.movePiece(piece, difficulty);
             if (chessGameService.checkForCheckmate())
             {
                 gameEndDialog();
@@ -69,7 +74,7 @@ namespace StockFishBlazorChess.Components.Pages
             string test = stockfish.getNextMove(boardFEN);
             Piece movedPiece = chessGameService._container.Items.First(x => x.Position == test.Split(',')[0]);
             MudItemDropInfo<Piece> piece = new MudItemDropInfo<Piece>(movedPiece, test.Split(',')[1], -1);
-            chessGameService.movePiece(piece, gameName);
+            chessGameService.movePiece(piece, difficulty);
             if (chessGameService.checkForCheckmate())
             {
                 gameEndDialog();
@@ -93,21 +98,20 @@ namespace StockFishBlazorChess.Components.Pages
 
         private async Task joinGame()
         {
-            // Retrieve the unique GUID from local storage
-            string? uniqueGuid = await localStorage.GetItemAsync<string>("uniqueGuid");
-
             if (string.IsNullOrEmpty(uniqueGuid))
             {
                 navigationManager.NavigateTo("/");
                 return;
             }
 
+            string key = uniqueGuid + difficulty;
+
             // Join the new game
             Dictionary<string, List<string>> connectedPlayers = userHandler.getConnectedPlayers();
-            Dictionary<string, MatchInfo> matchInfos = userHandler.getMatchInfos();
+            Dictionary<string, MatchInfo> matchInfos = matchManager.getMatchInfos();
 
             // Check if there are already connected players for the game
-            if (connectedPlayers.ContainsKey(gameName))
+            if (connectedPlayers.ContainsKey(key))
             {
                 handleExistingPlayer(connectedPlayers, matchInfos, uniqueGuid);
             }
@@ -118,24 +122,26 @@ namespace StockFishBlazorChess.Components.Pages
         }
         private void handleExistingPlayer(Dictionary<string, List<string>> connectedPlayers, Dictionary<string, MatchInfo> matchInfos, string uniqueGuid)
         {
-            if (connectedPlayers[gameName].Count > 0 && !connectedPlayers[gameName].Contains(uniqueGuid))
+            string key = uniqueGuid + difficulty;
+
+            if (connectedPlayers[key].Count > 0 && !connectedPlayers[key].Contains(uniqueGuid))
             {
                 navigationManager.NavigateTo("/");
                 return;
             }
             // Check if the current player is already connected to the game
-            if (connectedPlayers[gameName].Contains(uniqueGuid))
+            if (connectedPlayers[key].Contains(uniqueGuid))
             {
                 // The player is refreshing or renavigating
                 // Update the chessboard, pieces list, and player turn
-                chessGameService.chessBoard.board = userHandler.getMatchInfoBoard(gameName);
-                chessGameService.pieceChanges = userHandler.getMatchInfoMoves(gameName);
+                chessGameService.chessBoard.board = matchManager.getMatchInfoBoard(key);
+                chessGameService.pieceChanges = matchManager.getMatchInfoMoves(key);
                 chessGameService.piecesOnBoard = chessGameService.chessBoard.board.Cast<Piece>().ToList();
-                bool isWhitePlayer = connectedPlayers[gameName].First() == uniqueGuid;
+                bool isWhitePlayer = connectedPlayers[key].First() == uniqueGuid;
 
-                chessGameService.player.IsMyTurn = isWhitePlayer == matchInfos[gameName].isWhiteTurn;
+                chessGameService.player.IsMyTurn = isWhitePlayer == matchInfos[key].isWhiteTurn;
                 chessGameService.player.isWhitePlayer = isWhitePlayer;
-                chessGameService.whiteTurn = matchInfos[gameName].isWhiteTurn;
+                chessGameService.whiteTurn = matchInfos[key].isWhiteTurn;
                 StateHasChanged();
                 chessGameService._container.Refresh();
             }
@@ -145,8 +151,9 @@ namespace StockFishBlazorChess.Components.Pages
         {
             // First player to connect to the game
             // Create new entries for connected players and match information
-            connectedPlayers.Add(gameName, new List<string>() { uniqueGuid });
-            matchInfos.Add(gameName, new MatchInfo());
+            string key = uniqueGuid + difficulty;
+            connectedPlayers.Add(key, [uniqueGuid]);
+            matchInfos.Add(key, new MatchInfo());
             chessGameService.player.IsMyTurn = true;
             chessGameService.player.isWhitePlayer = true;
             chessGameService.ableToMove = true;
@@ -156,8 +163,8 @@ namespace StockFishBlazorChess.Components.Pages
         public async void Dispose()
         {
             // Update the match information with the current state of the chessboard
-            userHandler.setMatchInfoBoard(gameName, chessGameService.chessBoard.board, chessGameService.whiteTurn);
-            userHandler.setMatchInfoMoves(gameName, chessGameService.pieceChanges, chessGameService.whiteTurn);
+            matchManager.setMatchInfoBoard(uniqueGuid + difficulty, chessGameService.chessBoard.board, chessGameService.whiteTurn);
+            matchManager.setMatchInfoMoves(uniqueGuid + difficulty, chessGameService.pieceChanges, chessGameService.whiteTurn);
         }
     }
 }

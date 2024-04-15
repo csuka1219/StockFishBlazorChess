@@ -9,7 +9,7 @@ namespace StockFishBlazorChess.Components.Pages
 
         private void klikk()
         {
-            navigationManager.NavigateTo("game/asd");
+            navigationManager.NavigateTo("game/1320");
         }
     }
 }

@@ -14,11 +14,11 @@
             return "";
             Dictionary<string, List<string>> connectedPlayers = userHandler.getConnectedPlayers();
 
-            if (connectedPlayers.ContainsKey(gameName) && connectedPlayers[gameName].Count == 1)
+            if (connectedPlayers.ContainsKey(difficulty) && connectedPlayers[difficulty].Count == 1)
             {
                 return "";
             }
-            if (connectedPlayers.ContainsKey(gameName) && connectedPlayers[gameName].Count == 2)
+            if (connectedPlayers.ContainsKey(difficulty) && connectedPlayers[difficulty].Count == 2)
             {
                 return chessGameService.player.isWhitePlayer ? "" : "transform: rotate(180deg);";
             }
@@ -30,8 +30,8 @@
             return "";
             Dictionary<string, List<string>> connectedPlayers = userHandler.getConnectedPlayers();
 
-            if (!connectedPlayers.ContainsKey(gameName)) return string.Empty;
-            switch (connectedPlayers[gameName].Count)
+            if (!connectedPlayers.ContainsKey(difficulty)) return string.Empty;
+            switch (connectedPlayers[difficulty].Count)
             {
                 case 0:
                     return string.Empty;

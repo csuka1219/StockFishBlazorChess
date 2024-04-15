@@ -2,29 +2,30 @@
 using StockFishBlazorChess.Pieces;
 using System.ComponentModel;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace StockFishBlazorChess.Utilities
 {
     public static class ChessNotationConverter
     {
         private static readonly Dictionary<int, string> PieceMap = new Dictionary<int, string>
-    {
-        { 1, "" }, { 2, "r" }, { 3, "n" }, { 4, "b" },
-        { 5, "q" }, { 6, "k" }, { 11, "" }, { 12, "r" },
-        { 13, "n" }, { 14, "b" }, { 15, "q" }, { 16, "k" }
-    };
+        {
+            { 1, "" }, { 2, "r" }, { 3, "n" }, { 4, "b" },
+            { 5, "q" }, { 6, "k" }, { 11, "" }, { 12, "r" },
+            { 13, "n" }, { 14, "b" }, { 15, "q" }, { 16, "k" }
+        };
 
         private static readonly Dictionary<int, string> FileMap = new Dictionary<int, string>
-    {
-        { 0, "a" }, { 1, "b" }, { 2, "c" }, { 3, "d" },
-        { 4, "e" }, { 5, "f" }, { 6, "g" }, { 7, "h" }
-    };
+        {
+            { 0, "a" }, { 1, "b" }, { 2, "c" }, { 3, "d" },
+            { 4, "e" }, { 5, "f" }, { 6, "g" }, { 7, "h" }
+        };
 
         private static readonly Dictionary<int, string> RankMap = new Dictionary<int, string>
-    {
-        { 0, "1" }, { 1, "2" }, { 2, "3" }, { 3, "4" },
-        { 4, "5" }, { 5, "6" }, { 6, "7" }, { 7, "8" }
-    };
+        {
+            { 0, "1" }, { 1, "2" }, { 2, "3" }, { 3, "4" },
+            { 4, "5" }, { 5, "6" }, { 6, "7" }, { 7, "8" }
+        };
 
         public static string convertMoveToString(PieceChange pieceChange)
         {
@@ -90,6 +91,7 @@ namespace StockFishBlazorChess.Utilities
 
         public static Piece[,] convertStringToFEN(string boardString)
         {
+            List<char> DIGITS_CHARS = ['0', '1', '2', '3', '4', '5', '6', '7', '8'];
             Piece[,] board = new Piece[8, 8];
 
             string[] fenParts = boardString.Split(' ');
@@ -99,49 +101,15 @@ namespace StockFishBlazorChess.Utilities
 
             for (int rank = 7; rank >= 0; rank--)
             {
-                string rowFEN = ranks[rank];
-                for (int file = (rowFEN.Length - 1); file >= 0; file--)
+                string rowFEN = expandChessNotation(ranks[rank]);
+
+                for (int file = 7; file >= 0; file--)
                 {
                     char c = rowFEN[file];
-                    if (char.IsDigit(c))
+                    Piece piece = createPieceFromFEN(c, rank, file);
+                    if (piece != null)
                     {
-                        int d = c - '0';
-                        file = 7;
-                        //file -= d;
-                        //int i = test + file -1;
-                        while (d > 0)
-                        {
-                            if(board[rank, file] is not null)
-                            {
-                                file--;
-                                continue;
-                            }
-
-                            Piece piece = createPieceFromFEN('0', rank, file);
-                            if (piece != null)
-                            {
-                                board[rank, file] = piece;
-                            }
-                            file--;
-                            d--;
-                        }
-                        file--;
-                        //for (int i = file + d; i > file - d; i--)
-                        //{
-                        //    Piece piece = createPieceFromFEN('0', rank, i);
-                        //    if (piece != null)
-                        //    {
-                        //        board[rank, i] = piece;
-                        //    }
-                        //}
-                    }
-                    else
-                    {
-                        Piece piece = createPieceFromFEN(c, rank, file);
-                        if (piece != null)
-                        {
-                            board[rank, file] = piece;
-                        }
+                        board[rank, file] = piece;
                     }
                 }
             }
@@ -149,6 +117,25 @@ namespace StockFishBlazorChess.Utilities
             Castling.setCastlingAvailability(board, fenParts[2]);
 
             return board;
+        }
+
+        private static string expandChessNotation(string input)
+        {
+            // this is not the best way to do
+            string result = "";
+            foreach (char c in input)
+            {
+                if (char.IsDigit(c))
+                {
+                    int count = int.Parse(c.ToString());  // Convert the character to an integer
+                    result += new string('0', count);     // Append 'count' number of zeros to the result
+                }
+                else
+                {
+                    result += c;  // Append non-digit characters directly
+                }
+            }
+            return result;
         }
 
         private static Piece createPieceFromFEN(char fen, int row, int col)
