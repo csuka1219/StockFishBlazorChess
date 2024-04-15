@@ -16,9 +16,9 @@ namespace StockFishBlazorChess.Game
 
         public void setDifficulty(int elo)
         {
-            stockfishService.sendCommand($"setoption name UCI_LimitStrength true");
+            stockfishService.sendCommand($"setoption name UCI_LimitStrength value true");
             stockfishService.wait(waitTime);
-            stockfishService.sendCommand($"setoption name UCI_Elo {elo}");
+            stockfishService.sendCommand($"setoption name UCI_Elo value {elo}");
         }
 
         public string getNextMove(string fenPosition)
