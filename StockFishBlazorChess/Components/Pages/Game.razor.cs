@@ -12,7 +12,7 @@ using StockFishBlazorChess.Utilities;
 
 namespace StockFishBlazorChess.Components.Pages
 {
-    public partial class Game
+    public partial class Game: IDisposable
     {
         [Inject]
         private ILocalStorageService localStorage { get; set; } = default!;

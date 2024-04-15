@@ -69,7 +69,7 @@ namespace StockFishBlazorChess.Data
             }
 
             // If no castling is available, return "-"
-            return sb.Length > 0 ? sb.ToString() : "-";
+            return sb.Length > 0 ? sb.ToString() : " ";
         }
 
 
@@ -115,8 +115,9 @@ namespace StockFishBlazorChess.Data
 
         public static void setCastlingAvailability(Piece[,] board, string castlingAvailability)
         {
-            // Check if castling availability is not empty ("-")
-            if (castlingAvailability != "-")
+            // Check if castling availability is contains k or q
+            string lowerCastling = castlingAvailability.ToLower();
+            if (lowerCastling.Contains('k') || lowerCastling.Contains('q'))
             {
                 // Convert the castling availability string into an array of individual characters
                 char[] availableCastling = castlingAvailability.ToCharArray();

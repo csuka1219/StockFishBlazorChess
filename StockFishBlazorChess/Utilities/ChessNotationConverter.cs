@@ -1,5 +1,6 @@
 ﻿using StockFishBlazorChess.Data;
 using StockFishBlazorChess.Pieces;
+using System.ComponentModel;
 using System.Text;
 
 namespace StockFishBlazorChess.Utilities
@@ -93,23 +94,59 @@ namespace StockFishBlazorChess.Utilities
 
             string[] fenParts = boardString.Split(' ');
 
-            string[] ranks = boardString.Split('/');
+            string[] ranks = boardString.Split(new char[] { '/', ' ' },
+                                 StringSplitOptions.RemoveEmptyEntries);
 
             for (int rank = 7; rank >= 0; rank--)
             {
-                for (int file = 7; file >= 0; file--)
+                string rowFEN = ranks[rank];
+                for (int file = (rowFEN.Length - 1); file >= 0; file--)
                 {
-                    char c = ranks[rank][file];
-
-                    Piece piece = createPieceFromFEN(c, rank, file);
-                    if (piece != null)
+                    char c = rowFEN[file];
+                    if (char.IsDigit(c))
                     {
-                        board[rank, file] = piece;
+                        int d = c - '0';
+                        file = 7;
+                        //file -= d;
+                        //int i = test + file -1;
+                        while (d > 0)
+                        {
+                            if(board[rank, file] is not null)
+                            {
+                                file--;
+                                continue;
+                            }
+
+                            Piece piece = createPieceFromFEN('0', rank, file);
+                            if (piece != null)
+                            {
+                                board[rank, file] = piece;
+                            }
+                            file--;
+                            d--;
+                        }
+                        file--;
+                        //for (int i = file + d; i > file - d; i--)
+                        //{
+                        //    Piece piece = createPieceFromFEN('0', rank, i);
+                        //    if (piece != null)
+                        //    {
+                        //        board[rank, i] = piece;
+                        //    }
+                        //}
+                    }
+                    else
+                    {
+                        Piece piece = createPieceFromFEN(c, rank, file);
+                        if (piece != null)
+                        {
+                            board[rank, file] = piece;
+                        }
                     }
                 }
             }
 
-            Castling.setCastlingAvailability(board, fenParts[1]);
+            Castling.setCastlingAvailability(board, fenParts[2]);
 
             return board;
         }

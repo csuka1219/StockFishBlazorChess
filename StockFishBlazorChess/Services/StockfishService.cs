@@ -11,7 +11,6 @@ namespace StockFishBlazorChess.Services
 
         public StockfishService()
         {
-            //TODO: need add method which should be depended on os version
             ProcessStartInfo processStartInfo = new ProcessStartInfo
             {
                 FileName = "stockfish-windows-x86-64-avx2.exe",
