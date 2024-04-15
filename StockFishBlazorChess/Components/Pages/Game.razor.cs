@@ -8,6 +8,7 @@ using MudBlazor;
 using System.Data;
 using System.Xml;
 using StockFishBlazorChess.Handlers;
+using StockFishBlazorChess.Utilities;
 
 namespace StockFishBlazorChess.Components.Pages
 {
@@ -21,23 +22,23 @@ namespace StockFishBlazorChess.Components.Pages
 
         [Inject]
 		private NavigationManager navigationManager { get; set; } = default!;
-
         [Inject]
         private IUserHandler userHandler { get; set; } = default!;
-
-        private ChessGameService chessGameService = default!;
-        private StockfishService stockfishService = default!;
 
         [Parameter]
         public string gameName { get; set; } = string.Empty;
 
+
+        private ChessGameService chessGameService = new ChessGameService();
+        private StockfishService stockfishService = new StockfishService();
+        private Stockfish stockfish = default!;
+
         protected override async Task OnInitializedAsync()
         {
-            chessGameService = new ChessGameService();
-            stockfishService = new StockfishService();
-            Stockfish stockfish = new Stockfish(stockfishService);
             stockfishService.startEngine();
-            string bestMove = stockfish.getBestMove();
+            stockfish = new Stockfish(stockfishService);
+            stockfish.setDifficulty(1320);
+            //string bestMove = stockfish.getNextMove();
             int b = 0;
         }
 
@@ -56,19 +57,38 @@ namespace StockFishBlazorChess.Components.Pages
             chessGameService.movePiece(piece, gameName);
             if (chessGameService.checkForCheckmate())
             {
-                bool? result = await dialogService.ShowMessageBox(
+                gameEndDialog();
+                return;
+            }
+            stockfishResponse();
+        }
+
+        private void stockfishResponse()
+        {
+            string boardFEN = ChessNotationConverter.convertBoardToFEN(chessGameService.chessBoard.board, chessGameService.whiteTurn);
+            string test = stockfish.getNextMove(boardFEN);
+            Piece movedPiece = chessGameService._container.Items.First(x => x.Position == test.Split(',')[0]);
+            MudItemDropInfo<Piece> piece = new MudItemDropInfo<Piece>(movedPiece, test.Split(',')[1], -1);
+            chessGameService.movePiece(piece, gameName);
+            if (chessGameService.checkForCheckmate())
+            {
+                gameEndDialog();
+            }
+        }
+
+        private async void gameEndDialog()
+        {
+            bool? result = await dialogService.ShowMessageBox(
                     "Sakkmatt",
                     "later",
                     yesText: "Exit!", cancelText: "Again");
 
-                    if (result.HasValue && result.Value)
-                    {
-                        // Perform necessary actions for exiting or starting a new game
-                        // InitGame();
-                        //StateHasChanged();
-                    }
+            if (result.HasValue && result.Value)
+            {
+                // Perform necessary actions for exiting or starting a new game
+                // InitGame();
+                //StateHasChanged();
             }
-            
         }
 
         private async Task joinGame()
@@ -136,7 +156,7 @@ namespace StockFishBlazorChess.Components.Pages
         public async void Dispose()
         {
             // Update the match information with the current state of the chessboard
-            userHandler.setMatchInfoBoard(gameName, chessGameService.chessBoard.board);
+            userHandler.setMatchInfoBoard(gameName, chessGameService.chessBoard.board, chessGameService.whiteTurn);
             userHandler.setMatchInfoMoves(gameName, chessGameService.pieceChanges, chessGameService.whiteTurn);
         }
     }

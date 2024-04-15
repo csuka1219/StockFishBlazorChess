@@ -7,7 +7,7 @@ namespace StockFishBlazorChess.Handlers
     {
         List<string> getConnectedPlayerKeys();
         void setMatchInfoMoves(string gameName, List<PieceChange> pieceChanges, bool isWhiteTurn);
-        void setMatchInfoBoard(string gameName, Piece[,] board);
+        void setMatchInfoBoard(string gameName, Piece[,] board, bool isWhiteTurn);
         Piece[,] getMatchInfoBoard(string gameName);
         List<PieceChange> getMatchInfoMoves(string gameName);
         Dictionary<string, List<string>> getConnectedPlayers();
