@@ -89,9 +89,12 @@ namespace StockFishBlazorChess.Components.Pages
         private async void gameEndDialog()
         {
             bool? result = await dialogService.ShowMessageBox(
-                    "Sakkmatt",
-                    "later",
-                    yesText: "Exit!", cancelText: "Again");
+                    "CheckMate!",
+                    chessGameService.player.IsMyTurn ?
+                    "Unfortunately, you have lost. Better luck next time!"
+                    :
+                    "Congratulations, you won the game!",
+                    cancelText: "Close");
 
             if (result.HasValue && result.Value)
             {
