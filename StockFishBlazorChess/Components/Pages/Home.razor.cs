@@ -7,9 +7,18 @@ namespace StockFishBlazorChess.Components.Pages
         [Inject]
         private NavigationManager navigationManager { get; set; } = default!;
 
-        private void klikk()
+        private int elo { get; set; } = 1350;
+        private bool isBlackSide { get; set; }
+        private string side = "white";
+        private void startGame()
         {
-            navigationManager.NavigateTo("game/1320");
+            side = isBlackSide ? "white" : "black";
+            navigationManager.NavigateTo($"game/{side}/{elo}");
+        }
+
+        private void checkedChanged()
+        {
+            side = isBlackSide ? "white" : "black";
         }
     }
 }

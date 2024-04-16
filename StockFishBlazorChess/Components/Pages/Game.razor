@@ -1,4 +1,4 @@
-﻿@page "/game/{difficulty}"
+﻿@page "/game/{side}/{difficulty}"
 @using StockFishBlazorChess.Data;
 @using StockFishBlazorChess.Pieces;
 @using StockFishBlazorChess.Utilities
@@ -49,6 +49,11 @@
                     </MudGrid>
                 </MudList>
             </div>
+        </MudPaper>
+        <MudPaper Width="80%" Style="margin: auto; margin-top: 20px; padding: 20px; display: flex; justify-content: space-around;">
+            <MudButton OnClick="playAgainClick" Variant="Variant.Filled" Color="MudBlazor.Color.Primary">Play again</MudButton>
+            <MudButton OnClick="giveUpClick" Variant="Variant.Filled" Color="MudBlazor.Color.Error">Give up</MudButton>
+            <MudButton OnClick="exitClick" Variant="Variant.Filled" Color="MudBlazor.Color.Dark">Exit</MudButton>
         </MudPaper>
     </MudItem>
 </MudGrid>

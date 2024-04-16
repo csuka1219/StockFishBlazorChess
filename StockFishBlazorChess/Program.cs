@@ -1,7 +1,6 @@
 using Blazored.LocalStorage;
 using MudBlazor.Services;
 using StockFishBlazorChess.Components;
-using StockFishBlazorChess.Handlers;
 using StockFishBlazorChess.Interfaces;
 using StockFishBlazorChess.Services;
 

@@ -11,37 +11,13 @@
 
         private string getPlayerTableView()
         {
-            return "";
-            Dictionary<string, List<string>> connectedPlayers = userHandler.getConnectedPlayers();
-
-            if (connectedPlayers.ContainsKey(difficulty) && connectedPlayers[difficulty].Count == 1)
-            {
-                return "";
-            }
-            if (connectedPlayers.ContainsKey(difficulty) && connectedPlayers[difficulty].Count == 2)
-            {
-                return chessGameService.player.isWhitePlayer ? "" : "transform: rotate(180deg);";
-            }
-            return "transform: rotate(180deg);";
+            return isWhiteSide ? string.Empty : "transform: rotate(180deg);";
         }
 
         private string getPlayerPieceView()
         {
-            return "";
-            Dictionary<string, List<string>> connectedPlayers = userHandler.getConnectedPlayers();
-
-            if (!connectedPlayers.ContainsKey(difficulty)) return string.Empty;
-            switch (connectedPlayers[difficulty].Count)
-            {
-                case 0:
-                    return string.Empty;
-                case 1:
-                case 2:
-                    return chessGameService.player.isWhitePlayer ? "" : "transform: rotate(180deg);";
-                default:
-                    return string.Empty;
-            }
-
+            isWhiteSide = string.Equals(side, "white");
+            return isWhiteSide ? string.Empty : "transform: rotate(180deg);";
         }
     }
 

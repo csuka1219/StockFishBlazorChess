@@ -9,6 +9,16 @@ namespace StockFishBlazorChess.Services
     {
         private Dictionary<string, MatchInfo> matchInfos = new Dictionary<string, MatchInfo>();
 
+        public void addMatchInfo(string key)
+        {
+            matchInfos.Add(key, new MatchInfo());
+        }
+
+        public void removeMatchInfo(string key)
+        {
+            matchInfos.Remove(key);
+        }
+
         public void setMatchInfoMoves(string key, List<PieceChange> pieceChanges, bool isWhiteTurn)
         {
             matchInfos[key].pieceChanges = new List<PieceChange>(pieceChanges);
