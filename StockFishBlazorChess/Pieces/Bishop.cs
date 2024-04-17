@@ -15,10 +15,10 @@ namespace StockFishBlazorChess.Pieces
             return base.calculatePossibleMoves(board, availableMoves);
         }
 
-        public override bool[,] checkForStale(Piece[,] board, bool[,] staleArray)
+        public override bool[,] getCheckPositions(Piece[,] board, bool[,] staleArray)
         {
             staleArray = this.calculatePossibleMoves(board, staleArray);
-            return base.checkForStale(board, staleArray);
+            return base.getCheckPositions(board, staleArray);
         }
 
         public override string getFENRepresentation()

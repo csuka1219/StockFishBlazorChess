@@ -34,6 +34,12 @@ namespace StockFishBlazorChess.Utilities
                 return getCastlingFEN(pieceChange);
             }
 
+            bool isWhiteTurn = pieceChange.movedPieceValue < 12;
+
+            string isCheckString = pieceChange.isCheck && !pieceChange.isCheckmate ? "+" : "";
+
+            string isCheckmateString = pieceChange.isCheckmate ? "#" : "";
+
             int rowIndex = 7 - pieceChange.toMove.row;
             int colIndex = pieceChange.toMove.col;
 
@@ -46,7 +52,7 @@ namespace StockFishBlazorChess.Utilities
             string row = RankMap[rowIndex];
             string col = FileMap[colIndex];
 
-            return piece + isTakeString + col + row;
+            return piece + isTakeString + col + row + isCheckString + isCheckmateString;
         }
 
         private static string getCastlingFEN(PieceChange pieceChange)

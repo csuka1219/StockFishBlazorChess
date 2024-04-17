@@ -28,12 +28,12 @@ namespace StockFishBlazorChess.Pieces
         {
             return availableMoves;
         }
-        public virtual bool[,] calculatePossibleMoves(Piece[,] board, bool[,] availableMoves, bool[,] staleArray)
+        public virtual bool[,] calculatePossibleMoves(Piece[,] board, bool[,] availableMoves, bool[,] checkArray)
         {
             return availableMoves;
         }
 
-        public virtual bool[,] checkForStale(Piece[,] board, bool[,] staleArray)
+        public virtual bool[,] getCheckPositions(Piece[,] board, bool[,] staleArray)
         {
             return staleArray;
         }

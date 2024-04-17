@@ -7,13 +7,13 @@ namespace StockFishBlazorChess.Data
     {
         public static bool checkChecker(Piece[,] board, bool whiteTurn)
         {
-            bool[,] staleArray = new bool[8, 8];
+            bool[,] checkArray = new bool[8, 8];
             int kingRow = -1, kingCol = -1;
             foreach (Piece piece in board)
             {
                 if (piece.Color == Color.White != whiteTurn)
                 {
-                    staleArray = piece.checkForStale(board, staleArray);
+                    checkArray = piece.getCheckPositions(board, checkArray);
                 }
                 else
                 {
@@ -35,7 +35,7 @@ namespace StockFishBlazorChess.Data
                 return true;
             }
 
-            return staleArray[kingRow, kingCol];
+            return checkArray[kingRow, kingCol];
         }
     }
 }

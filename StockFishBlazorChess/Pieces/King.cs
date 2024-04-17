@@ -11,7 +11,7 @@ namespace StockFishBlazorChess.Pieces
             this.ableToCastling = ableToCastling;
         }
 
-        public override bool[,] calculatePossibleMoves(Piece[,] board, bool[,] availableMoves, bool[,] staleArray)
+        public override bool[,] calculatePossibleMoves(Piece[,] board, bool[,] availableMoves, bool[,] checkArray)
         {
             (int row, int col) = this.getPositionTuple();
             int size = 8;
@@ -57,7 +57,7 @@ namespace StockFishBlazorChess.Pieces
             void CheckCastlingForRook(int rookRow, int rookCol, int row, int targetCol1, int targetCol2)
             {
                 var rook = board[rookRow, rookCol];
-                if (rook.GetType() == typeof(Rook) && rook.As<Rook>()!.ableToCastling && board[row, targetCol1].PieceValue == 0 && board[row, targetCol2].PieceValue == 0 && !staleArray[row, targetCol1] && !staleArray[row, targetCol2] && !staleArray[row, col])
+                if (rook.GetType() == typeof(Rook) && rook.As<Rook>()!.ableToCastling && board[row, targetCol1].PieceValue == 0 && board[row, targetCol2].PieceValue == 0 && !checkArray[row, targetCol1] && !checkArray[row, targetCol2] && !checkArray[row, col])
                 {
                     availableMoves[row, targetCol1] = true;
                 }
@@ -68,10 +68,10 @@ namespace StockFishBlazorChess.Pieces
 
 		public override bool[,] calculatePossibleMoves(Piece[,] board, bool[,] availableMoves)
         {
-            bool[,] staleArray = new bool[8, 8];
+            bool[,] checkArray = new bool[8, 8];
 			(int row, int col) = this.getPositionTuple();
-            staleArray[row, col] = true;
-            return calculatePossibleMoves(board, availableMoves, staleArray);
+            checkArray[row, col] = true;
+            return calculatePossibleMoves(board, availableMoves, checkArray);
         }
 
 
@@ -91,10 +91,10 @@ namespace StockFishBlazorChess.Pieces
             return false;
         }
 
-        public override bool[,] checkForStale(Piece[,] board, bool[,] staleArray)
+        public override bool[,] getCheckPositions(Piece[,] board, bool[,] checkArray)
         {
-            staleArray = this.calculatePossibleMoves(board, staleArray, new bool[8,8]);
-            return base.checkForStale(board, staleArray);
+            checkArray = this.calculatePossibleMoves(board, checkArray, new bool[8,8]);
+            return base.getCheckPositions(board, checkArray);
         }
 
 

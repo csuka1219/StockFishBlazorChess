@@ -18,6 +18,7 @@ namespace StockFishBlazorChess.Services
         public bool[,] availableMoves = new bool[8, 8];
         public bool whiteTurn = true;
         private bool lastTurn = true;
+        private bool isCheckmate = false;
         public bool ableToMove = false;
         private bool dragEnded = true;
         private string lastposition = "";
@@ -46,8 +47,8 @@ namespace StockFishBlazorChess.Services
             int row = s[0] - '0';
             int col = s[1] - '0';
 
-            // Create a stale array to track stale positions
-            bool[,] staleArray = new bool[8, 8];
+            // Create a check array to track check positions
+            bool[,] checkArray = new bool[8, 8];
 
             // Iterate over each piece on the chessboard
             foreach (Piece piece in chessBoard.board)
@@ -55,18 +56,18 @@ namespace StockFishBlazorChess.Services
                 // Check if the piece's color matches the opposite of the current turn
                 if (piece.Color == Pieces.Color.White != whiteTurn)
                 {
-                    // Update the stale array with stale positions for the opposite color
-                    staleArray = piece.checkForStale(chessBoard.board, staleArray);
+                    // Update the check array with check positions for the opposite color
+                    checkArray = piece.getCheckPositions(chessBoard.board, checkArray);
                 }
             }
 
             // Check if the drag has ended
             if (dragEnded)
             {
-                // Calculate possible moves for the selected piece based on the chessboard and stale positions
+                // Calculate possible moves for the selected piece based on the chessboard and check positions
                 if (selectedPiece is King)
                 {
-                    availableMoves = selectedPiece.calculatePossibleMoves(chessBoard.board, availableMoves, staleArray);
+                    availableMoves = selectedPiece.calculatePossibleMoves(chessBoard.board, availableMoves, checkArray);
                 }
                 else
                 {
@@ -84,7 +85,7 @@ namespace StockFishBlazorChess.Services
             return availableMoves[row, col];
         }
 
-        public void movePiece(MudItemDropInfo<Piece> piece, string gameName)
+        public void movePiece(MudItemDropInfo<Piece> piece)
         {
             // Extract the new row and column from the dropzone identifier
             int newRow = piece.DropzoneIdentifier[0] - '0';
@@ -111,8 +112,6 @@ namespace StockFishBlazorChess.Services
             // Get the current position of the moved piece
             (int oldRow, int oldCol) = piece.Item!.getPositionTuple();
 
-            //Store move
-            pieceChanges.Add(new PieceChange((oldRow, oldCol), (newRow, newCol), piece.Item.PieceValue, hitpieceValue, isCastling, isEnpassant));
 
             // Set the piece on the chessboard to the new position
             chessBoard.setPiece(newRow, newCol, piece.Item, piecesOnBoard, isCastling, isEnpassant);
@@ -129,14 +128,33 @@ namespace StockFishBlazorChess.Services
 
             // Toggle the turn for the player
             player.IsMyTurn = !player.IsMyTurn;
+
+            bool isCheck = Check.checkChecker(chessBoard.board, whiteTurn);
+
+            //Store move
+            pieceChanges.Add(
+                new PieceChange(
+                    (oldRow, oldCol), 
+                    (newRow, newCol), 
+                    piece.Item.PieceValue, 
+                    hitpieceValue, 
+                    isCastling, 
+                    isEnpassant,
+                    isCheck)
+                );
+        }
+
+        public void storeMove()
+        {
+
         }
         
         public bool checkForCheckmate()
         {
             // Check if the game is in checkmate state
-            bool checkMate = CheckMate.isCheckMate(chessBoard.board, !whiteTurn);
-            ableToMove = checkMate == false;
-            return checkMate;
+            isCheckmate = CheckMate.isCheckMate(chessBoard.board, !whiteTurn);
+            ableToMove = !isCheckmate;
+            return isCheckmate;
         }
 
         public void removeInvalidMoves(Piece piece)
@@ -160,7 +178,7 @@ namespace StockFishBlazorChess.Services
                         // Replace the original cell with an empty piece
                         chessBoard.board[row, col] = new EmptyPiece();
 
-                        // Check if the move leads to a stale for the player
+                        // Check if the move leads to a check for the player
                         if (whiteTurn && Check.checkChecker(chessBoard.board, whiteTurn))
                         {
                             // Mark the move as invalid

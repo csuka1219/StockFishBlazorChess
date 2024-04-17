@@ -109,7 +109,7 @@ namespace StockFishBlazorChess.Pieces
         }
 
 
-        public override bool[,] checkForStale(Piece[,] board, bool[,] staleArray)
+        public override bool[,] getCheckPositions(Piece[,] board, bool[,] checkArray)
         {
             bool isWhite = this.Color == Color.White;
             int direction = isWhite ? 1 : -1;
@@ -120,15 +120,15 @@ namespace StockFishBlazorChess.Pieces
             int rightDiagonalCol = j + 1;
             if (leftDiagonalCol >= 0)
             {
-                staleArray[i - direction, leftDiagonalCol] = true;
+                checkArray[i - direction, leftDiagonalCol] = true;
             }
 
             if (rightDiagonalCol < 8)
             {
-                staleArray[i - direction, rightDiagonalCol] = true;
+                checkArray[i - direction, rightDiagonalCol] = true;
             }
 
-            return base.checkForStale(board, staleArray);
+            return base.getCheckPositions(board, checkArray);
         }
 
         public override string getFENRepresentation()

@@ -64,9 +64,10 @@ namespace StockFishBlazorChess.Components.Pages
 
         private void pieceUpdated(MudItemDropInfo<Piece> piece)
         {
-            chessGameService.movePiece(piece, difficulty);
+            chessGameService.movePiece(piece);
             if (chessGameService.checkForCheckmate())
             {
+                chessGameService.pieceChanges.Last().isCheckmate = true;
                 gameEndDialog();
                 return;
             }
@@ -79,9 +80,10 @@ namespace StockFishBlazorChess.Components.Pages
             string test = stockfish.getNextMove(boardFEN);
             Piece movedPiece = chessGameService._container.Items.First(x => x.Position == test.Split(',')[0]);
             MudItemDropInfo<Piece> piece = new MudItemDropInfo<Piece>(movedPiece, test.Split(',')[1], -1);
-            chessGameService.movePiece(piece, difficulty);
+            chessGameService.movePiece(piece);
             if (chessGameService.checkForCheckmate())
             {
+                chessGameService.pieceChanges.Last().isCheckmate = true;
                 gameEndDialog();
             }
         }
