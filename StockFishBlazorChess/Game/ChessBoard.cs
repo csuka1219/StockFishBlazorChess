@@ -59,14 +59,13 @@ namespace StockFishBlazorChess.Game
             }
         }
 
-        public void setPiece(int row, int col, Piece piece, IEnumerable<Piece> list)
+        public void setPiece(int row, int col, Piece piece, IEnumerable<Piece> list, bool isCastling, bool isEnPassant)
         {
-            if (Castling.canPerformCastling(piece, row, col))
+            if (isCastling)
             {
                 performCastling(row, col);
             }
-
-            if (EnPassant.isEnPassant(piece, row, col))
+            else if (isEnPassant)
             {
                 EnPassant.performEnPassant(board, piece, row, col, list);
             }

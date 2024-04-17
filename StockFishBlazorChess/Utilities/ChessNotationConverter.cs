@@ -27,19 +27,37 @@ namespace StockFishBlazorChess.Utilities
             { 4, "5" }, { 5, "6" }, { 6, "7" }, { 7, "8" }
         };
 
-        public static string convertMoveToString(PieceChange pieceChange)
+        public static string convertMoveToFEN(PieceChange pieceChange)
         {
+            if (pieceChange.isCastling)
+            {
+                return getCastlingFEN(pieceChange);
+            }
+
             int rowIndex = 7 - pieceChange.toMove.row;
             int colIndex = pieceChange.toMove.col;
 
-            string isHit = pieceChange.hitPiece == 0 ? "" : "x";
+            bool isTake = pieceChange.hitPiece != 0 || pieceChange.isEnpassant;
+            string isTakeString = isTake ? "x" : "";
+
             string piece = PieceMap[pieceChange.movedPieceValue];
-            piece = pieceChange.hitPiece != 0 && string.IsNullOrEmpty(piece) ? FileMap[pieceChange.fromMove.col] : piece;
+            piece = isTake && string.IsNullOrEmpty(piece) ? FileMap[pieceChange.fromMove.col] : piece;
+
             string row = RankMap[rowIndex];
             string col = FileMap[colIndex];
 
-            return piece + isHit + col + row;
+            return piece + isTakeString + col + row;
         }
+
+        private static string getCastlingFEN(PieceChange pieceChange)
+        {
+            if (pieceChange.fromMove.col > pieceChange.toMove.col) // moved left
+            {
+                return "O-O-O";
+            }
+            return "O-O";
+        }
+
 
         public static string convertBoardToFEN(Piece[,] board, bool isWhiteTurn)
         {
@@ -89,9 +107,8 @@ namespace StockFishBlazorChess.Utilities
             return sb.ToString();
         }
 
-        public static Piece[,] convertStringToFEN(string boardString)
+        public static Piece[,] convertFENToboard(string boardString)
         {
-            List<char> DIGITS_CHARS = ['0', '1', '2', '3', '4', '5', '6', '7', '8'];
             Piece[,] board = new Piece[8, 8];
 
             string[] fenParts = boardString.Split(' ');

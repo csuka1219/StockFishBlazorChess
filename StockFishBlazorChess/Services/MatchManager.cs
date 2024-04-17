@@ -33,7 +33,7 @@ namespace StockFishBlazorChess.Services
 
         public Piece[,] getMatchInfoBoard(string key)
         {
-            return ChessNotationConverter.convertStringToFEN(matchInfos[key].boardInfo);
+            return ChessNotationConverter.convertFENToboard(matchInfos[key].boardInfo);
         }
 
         public List<PieceChange> getMatchInfoMoves(string key)

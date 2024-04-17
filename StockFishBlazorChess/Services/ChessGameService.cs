@@ -2,6 +2,7 @@
 using StockFishBlazorChess.Game;
 using StockFishBlazorChess.Pieces;
 using MudBlazor;
+using StockFishBlazorChess.Rules;
 
 namespace StockFishBlazorChess.Services
 {
@@ -89,6 +90,8 @@ namespace StockFishBlazorChess.Services
             int newRow = piece.DropzoneIdentifier[0] - '0';
             int newCol = piece.DropzoneIdentifier[1] - '0';
 
+            bool isCastling = false;
+            bool isEnpassant = false;
             // Check if the dropped piece captures another piece
             bool isHitPiece = piecesOnBoard.Any(p => p.PieceValue != piece.Item!.PieceValue && p.Position == piece.DropzoneIdentifier);
             int hitpieceValue = 0;
@@ -99,15 +102,20 @@ namespace StockFishBlazorChess.Services
                 hitPiece.Position = null;
                 hitpieceValue = hitPiece.PieceValue;
             }
+            else
+            {
+                isCastling = Castling.canPerformCastling(piece.Item!, newRow, newCol);
+                isEnpassant = EnPassant.isEnPassant(piece.Item!, newRow, newCol);
+            }
 
             // Get the current position of the moved piece
             (int oldRow, int oldCol) = piece.Item!.getPositionTuple();
 
             //Store move
-            pieceChanges.Add(new PieceChange((oldRow, oldCol), (newRow, newCol), piece.Item.PieceValue, hitpieceValue));
+            pieceChanges.Add(new PieceChange((oldRow, oldCol), (newRow, newCol), piece.Item.PieceValue, hitpieceValue, isCastling, isEnpassant));
 
             // Set the piece on the chessboard to the new position
-            chessBoard.setPiece(newRow, newCol, piece.Item, piecesOnBoard);
+            chessBoard.setPiece(newRow, newCol, piece.Item, piecesOnBoard, isCastling, isEnpassant);
 
             // Set the dragEnded flag to true
             dragEnded = true;
