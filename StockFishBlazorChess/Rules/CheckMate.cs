@@ -4,7 +4,7 @@ namespace StockFishBlazorChess.Data
 {
     public static class CheckMate
     {
-        public static bool isCheckMate(Piece[,] board, bool whiteTurn)
+        public static bool isCheckmate(Piece[,] board, bool whiteTurn)
         {
             whiteTurn = !whiteTurn;
             foreach (Piece piece in board)

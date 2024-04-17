@@ -65,45 +65,65 @@ namespace StockFishBlazorChess.Components.Pages
         private void pieceUpdated(MudItemDropInfo<Piece> piece)
         {
             chessGameService.movePiece(piece);
-            if (chessGameService.checkForCheckmate())
+            if (!chessGameService.pieceChanges.Last().isCheck && chessGameService.checkForStalemate())
             {
                 chessGameService.pieceChanges.Last().isCheckmate = true;
-                gameEndDialog();
+                InvokeAsync(() => gameEndDialog("Stalemate!", true));
                 return;
             }
-            stockfishMove();
+            else if (chessGameService.checkForCheckmate())
+            {
+                chessGameService.pieceChanges.Last().isCheckmate = true;
+                InvokeAsync(() => gameEndDialog("Checkmate", false));
+                return;
+            }
+            Task.Run(() => { stockfishMove(); });
         }
 
         private void stockfishMove()
         {
             string boardFEN = ChessNotationConverter.convertBoardToFEN(chessGameService.chessBoard.board, chessGameService.whiteTurn);
-            string test = stockfish.getNextMove(boardFEN);
-            Piece movedPiece = chessGameService._container.Items.First(x => x.Position == test.Split(',')[0]);
-            MudItemDropInfo<Piece> piece = new MudItemDropInfo<Piece>(movedPiece, test.Split(',')[1], -1);
+            string nextMove = stockfish.getNextMove(boardFEN);
+            Piece movedPiece = chessGameService._container.Items.First(x => x.Position == nextMove.Split(',')[0]);
+            MudItemDropInfo<Piece> piece = new MudItemDropInfo<Piece>(movedPiece, nextMove.Split(',')[1], -1);
             chessGameService.movePiece(piece);
-            if (chessGameService.checkForCheckmate())
+            chessGameService._container.Refresh();
+            if (!chessGameService.pieceChanges.Last().isCheck && chessGameService.checkForStalemate())
             {
                 chessGameService.pieceChanges.Last().isCheckmate = true;
-                gameEndDialog();
+                InvokeAsync(() => gameEndDialog("Stalemate!", true));
+                unSubcribeGame();
+                return;
+            }
+            else if (chessGameService.checkForCheckmate())
+            {
+                chessGameService.pieceChanges.Last().isCheckmate = true;
+                InvokeAsync(() => gameEndDialog("Checkmate", false));
+                unSubcribeGame();
+                return;
             }
         }
 
-        private async void gameEndDialog()
+        private async void gameEndDialog(string title, bool isStalemate)
         {
-            bool? result = await dialogService.ShowMessageBox(
-                    "CheckMate!",
-                    chessGameService.player.IsMyTurn ?
-                    "Unfortunately, you have lost. Better luck next time!"
-                    :
-                    "Congratulations, you won the game!",
-                    cancelText: "Close");
-
-            if (result.HasValue && result.Value)
+            if (isStalemate)
             {
-                // Perform necessary actions for exiting or starting a new game
-                // InitGame();
-                //StateHasChanged();
+                await dialogService.ShowMessageBox(
+                        title,
+                        "Draw, well played!"
+                        );
             }
+            else
+            {
+                await dialogService.ShowMessageBox(
+                        title,
+                        chessGameService.player.IsMyTurn ?
+                        "Unfortunately, you have lost. Better luck next time!"
+                        :
+                        "Congratulations, you won the game!"
+                        );
+            }
+
         }
 
         private void joinGame()
@@ -174,15 +194,19 @@ namespace StockFishBlazorChess.Components.Pages
 
         private void playAgainClick()
         {
-            matchManager.removeMatchInfo(gameKey);
-            userHandler.removeConnectedPlayer(gameKey);
+            unSubcribeGame();
             navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
         }
         private void giveUpClick()
         {
+            unSubcribeGame();
+            navigationManager.NavigateTo("/");
+        }
+
+        private void unSubcribeGame()
+        {
             matchManager.removeMatchInfo(gameKey);
             userHandler.removeConnectedPlayer(gameKey);
-            navigationManager.NavigateTo("/");
         }
         private void exitClick()
         {

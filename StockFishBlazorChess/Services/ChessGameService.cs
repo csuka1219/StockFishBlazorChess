@@ -143,18 +143,20 @@ namespace StockFishBlazorChess.Services
                     isCheck)
                 );
         }
-
-        public void storeMove()
-        {
-
-        }
         
         public bool checkForCheckmate()
         {
             // Check if the game is in checkmate state
-            isCheckmate = CheckMate.isCheckMate(chessBoard.board, !whiteTurn);
+            isCheckmate = CheckMate.isCheckmate(chessBoard.board, !whiteTurn);
             ableToMove = !isCheckmate;
             return isCheckmate;
+        }
+
+        public bool checkForStalemate()
+        {
+            // stalemate meaning there is no available moves just like in checkmate, the difference is the king not in check
+            // so we can use the isCheckmate function for check stalemate
+            return CheckMate.isCheckmate(chessBoard.board, !whiteTurn);
         }
 
         public void removeInvalidMoves(Piece piece)

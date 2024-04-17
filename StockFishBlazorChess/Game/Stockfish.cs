@@ -6,7 +6,7 @@ namespace StockFishBlazorChess.Game
     public class Stockfish
     {
         private StockfishService stockfishService;
-        private int depth = 10;
+        private int depth = 15;
         private int waitTime = 100; //milliseconds
 
         public Stockfish(StockfishService stockfishService)
