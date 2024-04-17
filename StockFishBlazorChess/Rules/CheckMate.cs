@@ -38,7 +38,7 @@ namespace StockFishBlazorChess.Data
                     if (availableMoves[newRow, newCol])
                     {
                         Piece lastHitPiece = board[newRow, newCol];
-                        MovePiece(board, piece, newRow, newCol, row, col);
+                        movePiece(board, piece, newRow, newCol, row, col);
 
                         if (isWhiteTurn && Check.checkChecker(board, isWhiteTurn))
                         {
@@ -46,7 +46,7 @@ namespace StockFishBlazorChess.Data
                         }
                         else if (isWhiteTurn)
                         {
-                            UndoMove(board, lastHitPiece, newRow, newCol, row, col);
+                            undoMove(board, piece, lastHitPiece, newRow, newCol, row, col);
                             return true;
                         }
                         if (!isWhiteTurn && Check.checkChecker(board, isWhiteTurn))
@@ -55,27 +55,29 @@ namespace StockFishBlazorChess.Data
                         }
                         else if (!isWhiteTurn)
                         {
-                            UndoMove(board, lastHitPiece, newRow, newCol, row, col);
+                            undoMove(board, piece, lastHitPiece, newRow, newCol, row, col);
                             return true;
                         }
 
-                        UndoMove(board, lastHitPiece, newRow, newCol, row, col);
+                        undoMove(board, piece, lastHitPiece, newRow, newCol, row, col);
                     }
                 }
             }
             return false;
         }
 
-        private static void MovePiece(Piece[,] board, Piece piece, int newRow, int newCol, int oldRow, int oldCol)
+        private static void movePiece(Piece[,] board, Piece piece, int newRow, int newCol, int oldRow, int oldCol)
         {
             board[newRow, newCol] = piece;
-            board[newRow, newCol].setPosition($"{oldRow}{oldCol}", true);
-            board[oldRow, oldCol].setPosition($"{newRow}{newCol}", true);
+            board[oldRow, oldCol] = new EmptyPiece();
+            board[newRow, newCol].setPosition($"{newRow}{newCol}", true);
+            board[oldRow, oldCol].setPosition($"{oldRow}{oldCol}", true);
         }
 
-        private static void UndoMove(Piece[,] board, Piece lastHitPiece, int newRow, int newCol, int oldRow, int oldCol)
+        private static void undoMove(Piece[,] board, Piece piece, Piece lastHitPiece, int newRow, int newCol, int oldRow, int oldCol)
         {
             board[newRow, newCol] = lastHitPiece;
+            board[oldRow, oldCol] = piece;
             board[newRow, newCol].setPosition($"{newRow}{newCol}", true);
             board[oldRow, oldCol].setPosition($"{oldRow}{oldCol}", true);
         }
