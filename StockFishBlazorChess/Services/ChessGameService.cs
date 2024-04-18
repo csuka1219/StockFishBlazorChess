@@ -19,6 +19,7 @@ namespace StockFishBlazorChess.Services
         public bool whiteTurn = true;
         private bool lastTurn = true;
         private bool isCheckmate = false;
+        private bool isPromotion = false;
         public bool ableToMove = false;
         private bool dragEnded = true;
         private string lastposition = "";
@@ -107,6 +108,7 @@ namespace StockFishBlazorChess.Services
             {
                 isCastling = Castling.canPerformCastling(piece.Item!, newRow, newCol);
                 isEnpassant = EnPassant.isEnPassant(piece.Item!, newRow, newCol);
+                isPromotion = Promotion.isPromotion(piece.Item!, newRow);
             }
 
             // Get the current position of the moved piece
@@ -147,7 +149,7 @@ namespace StockFishBlazorChess.Services
         public bool checkForCheckmate()
         {
             // Check if the game is in checkmate state
-            isCheckmate = CheckMate.isCheckmate(chessBoard.board, !whiteTurn);
+            isCheckmate = Checkmate.isCheckmate(chessBoard.board, !whiteTurn);
             ableToMove = !isCheckmate;
             return isCheckmate;
         }
@@ -156,7 +158,7 @@ namespace StockFishBlazorChess.Services
         {
             // stalemate meaning there is no available moves just like in checkmate, the difference is the king not in check
             // so we can use the isCheckmate function for check stalemate
-            return CheckMate.isCheckmate(chessBoard.board, !whiteTurn);
+            return Checkmate.isCheckmate(chessBoard.board, !whiteTurn);
         }
 
         public void removeInvalidMoves(Piece piece)

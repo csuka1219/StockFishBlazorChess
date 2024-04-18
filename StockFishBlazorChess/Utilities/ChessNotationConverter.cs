@@ -192,7 +192,13 @@ namespace StockFishBlazorChess.Utilities
             int endCol = fen[2] - 'a';
             int endRow = 8 - (fen[3] - '0');
 
-            return $"{startRow}{startCol},{endRow}{endCol}";
+            string promotionValue = string.Empty;
+            if (fen.Length > 4) 
+            {
+                promotionValue = fen[4].ToString();
+            }
+
+            return $"{startRow}{startCol},{endRow}{endCol},{promotionValue}";
         }
     }
 

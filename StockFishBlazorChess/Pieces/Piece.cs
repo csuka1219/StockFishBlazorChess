@@ -1,11 +1,11 @@
 ﻿
 namespace StockFishBlazorChess.Pieces
 {
-    public class Piece
+    public abstract class Piece
     {
         public readonly Color Color;
         public int PieceValue { get; init; }
-        public string? Icon { get; init; }
+        public string? Icon { get; set; }
         public string? Position { get; set; }
 
         public Piece(Color color, int pieceValue, string? icon, string? position)
@@ -15,15 +15,6 @@ namespace StockFishBlazorChess.Pieces
             Icon = icon;
             Position = position;
         }
-
-        public Piece(Piece piece)
-        {
-            Color = piece.Color;
-            PieceValue = piece.PieceValue;
-            Icon = piece.Icon;
-            Position = piece.Position;
-        }
-
         public virtual bool[,] calculatePossibleMoves(Piece[,] board, bool[,] availableMoves)
         {
             return availableMoves;

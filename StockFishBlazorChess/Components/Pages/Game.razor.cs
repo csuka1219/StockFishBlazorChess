@@ -9,6 +9,7 @@ using System.Data;
 using System.Xml;
 using StockFishBlazorChess.Utilities;
 using StockFishBlazorChess.Interfaces;
+using StockFishBlazorChess.Rules;
 
 namespace StockFishBlazorChess.Components.Pages
 {
@@ -87,6 +88,10 @@ namespace StockFishBlazorChess.Components.Pages
             Piece movedPiece = chessGameService._container.Items.First(x => x.Position == nextMove.Split(',')[0]);
             MudItemDropInfo<Piece> piece = new MudItemDropInfo<Piece>(movedPiece, nextMove.Split(',')[1], -1);
             chessGameService.movePiece(piece);
+            if (nextMove.Length > 6) 
+            {
+                Promotion.performPromotion(chessGameService, piece.Item!, nextMove.Last());
+            }
             chessGameService._container.Refresh();
             if (!chessGameService.pieceChanges.Last().isCheck && chessGameService.checkForStalemate())
             {

@@ -25,7 +25,7 @@ namespace StockFishBlazorChess.Pieces
             int leftDiagonalCol = col - 1;
             int rightDiagonalCol = col + 1;
 
-            if (isValidMove(board, row + forwardDirection, col, isWhiteTurn))
+            if (isValidMove(board, row + forwardDirection, col))
             {
                 markMove(availableMoves, row + forwardDirection, col);
             }
@@ -43,7 +43,7 @@ namespace StockFishBlazorChess.Pieces
             if (row == startingRow)
             {
                 int doubleMoveRow = row + 2 * forwardDirection;
-                if (isValidMove(board, doubleMoveRow, col, isWhiteTurn) && board[row + forwardDirection, col].PieceValue == 0)
+                if (isValidMove(board, doubleMoveRow, col) && board[row + forwardDirection, col].PieceValue == 0)
                 {
                     markMove(availableMoves, doubleMoveRow, col);
                 }
@@ -54,7 +54,7 @@ namespace StockFishBlazorChess.Pieces
             return base.calculatePossibleMoves(board, availableMoves);
         }
 
-        private static bool isValidMove(Piece[,] board, int row, int col, bool isWhiteTurn)
+        private static bool isValidMove(Piece[,] board, int row, int col)
         {
             if (row >= 0 && row < 8 && col >= 0 && col < 8)
             {
@@ -115,6 +115,7 @@ namespace StockFishBlazorChess.Pieces
             int direction = isWhite ? 1 : -1;
 
             (int i, int j) = this.getPositionTuple();
+            if (i == 7 || i == 0) return base.getCheckPositions(board, checkArray);
 
             int leftDiagonalCol = j - 1;
             int rightDiagonalCol = j + 1;

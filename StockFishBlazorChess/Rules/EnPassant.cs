@@ -3,10 +3,10 @@
 namespace StockFishBlazorChess.Rules
 {    public static class EnPassant
     {
-        public static bool isEnPassant(Piece piece, int row, int col)
+        public static bool isEnPassant(Piece piece, int newRow, int newCol)
         {
             int enPassantRow = piece.Color == Color.White ? 2 : 5;
-            return piece is Pawn && row == enPassantRow && col != piece.getPositionTuple().col;
+            return piece is Pawn && newRow == enPassantRow && newCol != piece.getPositionTuple().col;
         }
 
         public static void performEnPassant(Piece[,] board, Piece piece, int row, int col, IEnumerable<Piece> list)
