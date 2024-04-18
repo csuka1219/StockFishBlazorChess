@@ -83,6 +83,8 @@ namespace StockFishBlazorChess.Components.Pages
 
         private void stockfishMove()
         {
+            //Promotion.performPromotion(chessGameService, chessGameService.chessBoard.board[7, 0], 'q');
+            //InvokeAsync(StateHasChanged);
             string boardFEN = ChessNotationConverter.convertBoardToFEN(chessGameService.chessBoard.board, chessGameService.whiteTurn);
             string nextMove = stockfish.getNextMove(boardFEN);
             Piece movedPiece = chessGameService._container.Items.First(x => x.Position == nextMove.Split(',')[0]);
@@ -91,6 +93,7 @@ namespace StockFishBlazorChess.Components.Pages
             if (nextMove.Length > 6) 
             {
                 Promotion.performPromotion(chessGameService, piece.Item!, nextMove.Last());
+                InvokeAsync(StateHasChanged);
             }
             chessGameService._container.Refresh();
             if (!chessGameService.pieceChanges.Last().isCheck && chessGameService.checkForStalemate())
@@ -159,8 +162,6 @@ namespace StockFishBlazorChess.Components.Pages
         }
         private void handleExistingPlayer(Dictionary<string, List<string>> connectedPlayers, string uniqueGuid)
         {
-            Dictionary<string, MatchInfo> matchInfos = matchManager.getMatchInfos();
-
             if (connectedPlayers[gameKey].Count > 0 && !connectedPlayers[gameKey].Contains(uniqueGuid))
             {
                 navigationManager.NavigateTo("/");

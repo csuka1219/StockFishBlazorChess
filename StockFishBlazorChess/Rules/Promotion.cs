@@ -30,9 +30,7 @@ namespace StockFishBlazorChess.Rules
                     chessGameService.chessBoard.board[row, col] = new Knight(piece.Color, piece.Color == Color.White ? PieceConstants.whiteKnightValue : PieceConstants.blackKnightValue, $"Images/{getColorChar(piece.Color)}N.svg", new string(piece.Position));
                     break;
             }
-            //promotedPawn.Icon = chessGameService.chessBoard.board[row, col].Icon;
-            promotedPawn = chessGameService.chessBoard.board[row, col];
-            //chessGameService.piecesOnBoard = chessGameService.chessBoard.board.Cast<Piece>().ToList();
+            chessGameService.piecesOnBoard = chessGameService.chessBoard.board.Cast<Piece>().ToList();
         }
 
         private static char getColorChar(Color color)
