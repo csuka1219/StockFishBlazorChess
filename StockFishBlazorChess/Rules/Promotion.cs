@@ -1,5 +1,4 @@
-﻿using StockFishBlazorChess.Game;
-using StockFishBlazorChess.Pieces;
+﻿using StockFishBlazorChess.Pieces;
 using StockFishBlazorChess.Services;
 
 namespace StockFishBlazorChess.Rules
@@ -10,8 +9,13 @@ namespace StockFishBlazorChess.Rules
         {
             return piece is Pawn && (newRow is 7 or 0);
         }
+		public static bool isPromotion(MudBlazor.MudItemDropInfo<Piece> piece)
+		{
+			int newRow = piece.DropzoneIdentifier[0] - '0';
+			return piece.Item is Pawn && (newRow is 7 or 0);
+		}
 
-        public static void performPromotion(ChessGameService chessGameService, Piece piece, char pieceChar)
+		public static void performPromotion(ChessGameService chessGameService, Piece piece, char pieceChar)
         {
             Piece promotedPawn = chessGameService.piecesOnBoard.First(x => x == piece);
             (int row, int col) = piece.getPositionTuple();

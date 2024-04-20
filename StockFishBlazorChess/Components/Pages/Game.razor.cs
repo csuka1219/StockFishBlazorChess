@@ -10,6 +10,7 @@ using System.Xml;
 using StockFishBlazorChess.Utilities;
 using StockFishBlazorChess.Interfaces;
 using StockFishBlazorChess.Rules;
+using StockFishBlazorChess.Components.Dialogs;
 
 namespace StockFishBlazorChess.Components.Pages
 {
@@ -43,7 +44,7 @@ namespace StockFishBlazorChess.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            stockfish = new Stockfish(stockfishService);
+			stockfish = new Stockfish(stockfishService);
 
             stockfishService.startEngine();
 
@@ -53,7 +54,7 @@ namespace StockFishBlazorChess.Components.Pages
             uniqueGuid = await localStorage.GetItemAsync<string>("uniqueGuid");
             gameKey = uniqueGuid + difficulty;
             isWhiteSide = string.Equals(side, "white");
-        }
+		}
         protected override void OnAfterRender(bool firstRender)
         {
             if (firstRender)
@@ -63,28 +64,49 @@ namespace StockFishBlazorChess.Components.Pages
             base.OnAfterRender(firstRender);
         }
 
-        private void pieceUpdated(MudItemDropInfo<Piece> piece)
+        private async void pieceUpdated(MudItemDropInfo<Piece> piece)
         {
+            bool isPromotion = Promotion.isPromotion(piece);
+            char pieceValueChar = '_';
+
+			if (isPromotion)
+            {
+                pieceValueChar = await selectPromotionPiece();
+            }
+
             chessGameService.movePiece(piece);
+
+            if(isPromotion)
+            {
+				Promotion.performPromotion(chessGameService, piece.Item!, pieceValueChar);
+				await InvokeAsync(StateHasChanged);
+			}
+
             if (!chessGameService.pieceChanges.Last().isCheck && chessGameService.checkForStalemate())
             {
                 chessGameService.pieceChanges.Last().isCheckmate = true;
-                InvokeAsync(() => gameEndDialog("Stalemate!", true));
+                await InvokeAsync(() => gameEndDialog("Stalemate!", true));
                 return;
             }
             else if (chessGameService.checkForCheckmate())
             {
                 chessGameService.pieceChanges.Last().isCheckmate = true;
-                InvokeAsync(() => gameEndDialog("Checkmate", false));
+                await InvokeAsync(() => gameEndDialog("Checkmate", false));
                 return;
             }
-            Task.Run(() => { stockfishMove(); });
+            _ = Task.Run(() => { stockfishMove(); });
         }
 
-        private void stockfishMove()
+		private async Task<char> selectPromotionPiece()
+		{
+			var dialog = await dialogService.ShowAsync<PromotionDialog>("Promotion");
+			var result = await dialog.Result;
+			string pieceStrValue = result.Data.ToString()!;
+            return char.Parse(pieceStrValue);
+		}
+
+		private async void stockfishMove()
         {
-            //Promotion.performPromotion(chessGameService, chessGameService.chessBoard.board[7, 0], 'q');
-            //InvokeAsync(StateHasChanged);
             string boardFEN = ChessNotationConverter.convertBoardToFEN(chessGameService.chessBoard.board, chessGameService.whiteTurn);
             string nextMove = stockfish.getNextMove(boardFEN);
             Piece movedPiece = chessGameService._container.Items.First(x => x.Position == nextMove.Split(',')[0]);
@@ -93,20 +115,20 @@ namespace StockFishBlazorChess.Components.Pages
             if (nextMove.Length > 6) 
             {
                 Promotion.performPromotion(chessGameService, piece.Item!, nextMove.Last());
-                InvokeAsync(StateHasChanged);
+                await InvokeAsync(StateHasChanged);
             }
             chessGameService._container.Refresh();
             if (!chessGameService.pieceChanges.Last().isCheck && chessGameService.checkForStalemate())
             {
                 chessGameService.pieceChanges.Last().isCheckmate = true;
-                InvokeAsync(() => gameEndDialog("Stalemate!", true));
+                await InvokeAsync(() => gameEndDialog("Stalemate!", true));
                 unSubcribeGame();
                 return;
             }
             else if (chessGameService.checkForCheckmate())
             {
                 chessGameService.pieceChanges.Last().isCheckmate = true;
-                InvokeAsync(() => gameEndDialog("Checkmate", false));
+                await InvokeAsync(() => gameEndDialog("Checkmate", false));
                 unSubcribeGame();
                 return;
             }
