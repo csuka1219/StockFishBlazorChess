@@ -21,7 +21,7 @@ namespace StockFishBlazorChess.Pieces
             return base.getCheckPositions(board, staleArray);
         }
 
-        public override string getFENRepresentation()
+        public override string getAlgebraicNotation()
         {
             return Color == Color.White ? "B" : "b";
         }

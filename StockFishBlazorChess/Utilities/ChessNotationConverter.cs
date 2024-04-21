@@ -26,11 +26,11 @@ namespace StockFishBlazorChess.Utilities
             { 4, "5" }, { 5, "6" }, { 6, "7" }, { 7, "8" }
         };
 
-        public static string convertMoveToFEN(PieceChange pieceChange)
+        public static string convertMoveToAlgebraicNotation(PieceChange pieceChange)
         {
             if (pieceChange.isCastling)
             {
-                return getCastlingFEN(pieceChange);
+                return getCastlingAlgebraicNotation(pieceChange);
             }
 
             string isCheckString = pieceChange.isCheck && !pieceChange.isCheckmate ? "+" : "";
@@ -52,7 +52,7 @@ namespace StockFishBlazorChess.Utilities
             return piece + isTakeString + col + row + isCheckString + isCheckmateString;
         }
 
-        public static string convertCoordinateToFEN(string coordinates)
+        public static string convertCoordinateToAlgebraicNotation(string coordinates)
         {
 			int row = coordinates[0] - '0';
 			int col = coordinates[1] - '0';
@@ -63,7 +63,7 @@ namespace StockFishBlazorChess.Utilities
 			return $"{colChar}{rowChar}";
 		}
 
-        private static string getCastlingFEN(PieceChange pieceChange)
+        private static string getCastlingAlgebraicNotation(PieceChange pieceChange)
         {
             if (pieceChange.fromMove.col > pieceChange.toMove.col) // moved left (long castle)
             {
@@ -97,7 +97,7 @@ namespace StockFishBlazorChess.Utilities
                             emptySquareCount = 0;
                         }
 
-                        sb.Append(piece.getFENRepresentation());
+                        sb.Append(piece.getAlgebraicNotation());
                     }
                 }
 
@@ -141,7 +141,7 @@ namespace StockFishBlazorChess.Utilities
                 for (int file = 7; file >= 0; file--)
                 {
                     char c = rowFEN[file];
-                    Piece piece = createPieceFromFEN(c, rank, file);
+                    Piece piece = createPieceFromChar(c, rank, file);
                     if (piece != null)
                     {
                         board[rank, file] = piece;
@@ -173,12 +173,12 @@ namespace StockFishBlazorChess.Utilities
             return result;
         }
 
-        private static Piece createPieceFromFEN(char fen, int row, int col)
+        private static Piece createPieceFromChar(char pieceChar, int row, int col)
         {
-            Pieces.Color color = char.IsUpper(fen) ? Pieces.Color.White : Pieces.Color.Black;
+            Pieces.Color color = char.IsUpper(pieceChar) ? Pieces.Color.White : Pieces.Color.Black;
             bool isWhite = color == Pieces.Color.White;
 
-            switch (char.ToLower(fen))
+            switch (char.ToLower(pieceChar))
             {
                 case 'r':
                     return new Rook(color, isWhite ? PieceConstants.whiteRookValue : PieceConstants.blackRookValue, isWhite ? "Images/wR.svg" : "Images/bR.svg", $"{row}{col}", ableToCastling: false);
@@ -197,17 +197,17 @@ namespace StockFishBlazorChess.Utilities
             }
         }
 
-        public static string ConvertFenTo2DStringIndex(string fen)
+        public static string convertAlgebraicNotationTo2DStringIndex(string move)
         {
-            int startCol = fen[0] - 'a';  // Converts 'e' to 4, for example
-            int startRow = 8 - (fen[1] - '0');  // Converts '2' to 6 (since row index is reverse in chess arrays)
-            int endCol = fen[2] - 'a';
-            int endRow = 8 - (fen[3] - '0');
+            int startCol = move[0] - 'a';  // example: 'e' to 4,
+            int startRow = 8 - (move[1] - '0');  // example: Converts '2' to 6 (since row index is reverse in chess arrays)
+			int endCol = move[2] - 'a';
+            int endRow = 8 - (move[3] - '0');
 
             string promotionValue = string.Empty;
-            if (fen.Length > 4) 
+            if (move.Length > 4) 
             {
-                promotionValue = fen[4].ToString();
+                promotionValue = move[4].ToString();
             }
 
             return $"{startRow}{startCol},{endRow}{endCol},{promotionValue}";

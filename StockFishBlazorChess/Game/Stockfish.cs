@@ -37,7 +37,7 @@ namespace StockFishBlazorChess.Game
                 }
             }
             stockfishService.sendCommand($"position {fenPosition} moves {response}");
-            return ChessNotationConverter.ConvertFenTo2DStringIndex(response);
+            return ChessNotationConverter.convertAlgebraicNotationTo2DStringIndex(response!);
         }
 
     }

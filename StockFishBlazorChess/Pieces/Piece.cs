@@ -45,7 +45,7 @@ namespace StockFishBlazorChess.Pieces
             return (row, col);
         }
 
-        public virtual string getFENRepresentation()
+        public virtual string getAlgebraicNotation()
         {
             return "0";
         }

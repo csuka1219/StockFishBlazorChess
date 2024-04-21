@@ -97,7 +97,7 @@ namespace StockFishBlazorChess.Pieces
 
         private void checkEnPassantCapture(Piece[,] board, bool[,] availableMoves, int row, int col, int forwardDirection)
         {
-            if (col >= 0 && col < 8 && board[row, col] is Pawn && board[row, col].As<Pawn>().ableToEnPassant)
+            if (col >= 0 && col < 8 && board[row, col] is Pawn && board[row, col].As<Pawn>()!.ableToEnPassant)
             {
                 markMove(availableMoves, row + forwardDirection, col);
             }
@@ -132,7 +132,7 @@ namespace StockFishBlazorChess.Pieces
             return base.getCheckPositions(board, checkArray);
         }
 
-        public override string getFENRepresentation()
+        public override string getAlgebraicNotation()
         {
             return Color == Color.White ? "P" : "p";
         }

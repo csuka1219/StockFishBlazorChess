@@ -32,10 +32,10 @@ namespace StockFishBlazorChess.Rules
 
                 (int row, int col) = piece.getPositionTuple();
 
-				if (piece.As<Pawn>().ableToEnPassant && ((col>0 && board[row, col-1] is Pawn && board[row, col-1].Color != piece.Color) || (col<7&&board[row, col + 1] is Pawn && board[row, col + 1].Color != piece.Color)))
+				if (piece.As<Pawn>()!.ableToEnPassant && ((col>0 && board[row, col-1] is Pawn && board[row, col-1].Color != piece.Color) || (col<7&&board[row, col + 1] is Pawn && board[row, col + 1].Color != piece.Color)))
                 {
 					int direction = piece.Color == Color.White ? 2 : -2;
-					return ChessNotationConverter.convertCoordinateToFEN($"{row+direction}{col}");
+					return ChessNotationConverter.convertCoordinateToAlgebraicNotation($"{row+direction}{col}");
 				}
             }
 
