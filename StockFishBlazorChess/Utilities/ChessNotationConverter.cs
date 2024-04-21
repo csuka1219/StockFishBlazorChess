@@ -1,8 +1,7 @@
 ﻿using StockFishBlazorChess.Data;
 using StockFishBlazorChess.Pieces;
-using System.ComponentModel;
+using StockFishBlazorChess.Rules;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace StockFishBlazorChess.Utilities
 {
@@ -52,6 +51,17 @@ namespace StockFishBlazorChess.Utilities
 
             return piece + isTakeString + col + row + isCheckString + isCheckmateString;
         }
+
+        public static string convertCoordinateToFEN(string coordinates)
+        {
+			int row = coordinates[0] - '0';
+			int col = coordinates[1] - '0';
+
+			char rowChar = (char)('8' - row+1);
+			char colChar = (char)('a' + col);
+
+			return $"{colChar}{rowChar}";
+		}
 
         private static string getCastlingFEN(PieceChange pieceChange)
         {
@@ -105,10 +115,14 @@ namespace StockFishBlazorChess.Utilities
             // Add castling availability
             sb.Append(' ');
             sb.Append(isWhiteTurn == true ? 'w' : 'b');
+
             sb.Append(' ');
             sb.Append(Castling.getCastlingAvailability(board));
 
-            return sb.ToString();
+			sb.Append(' ');
+            sb.Append(EnPassant.getEnPassantAvailability(board));
+
+			return sb.ToString();
         }
 
         public static Piece[,] convertFENToboard(string boardString)

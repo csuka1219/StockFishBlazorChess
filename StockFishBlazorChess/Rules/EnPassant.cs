@@ -1,4 +1,6 @@
-﻿using StockFishBlazorChess.Pieces;
+﻿using MudBlazor.Extensions;
+using StockFishBlazorChess.Pieces;
+using StockFishBlazorChess.Utilities;
 
 namespace StockFishBlazorChess.Rules
 {    public static class EnPassant
@@ -20,6 +22,24 @@ namespace StockFishBlazorChess.Rules
                 capturedPawn.Position = null;
                 board[enPassantRow, col] = new EmptyPiece();
             }
+        }
+
+        public static string getEnPassantAvailability(Piece[,] board)
+        {
+            foreach (Piece piece in board)
+            {
+                if (piece is not Pawn) continue;
+
+                (int row, int col) = piece.getPositionTuple();
+
+				if (piece.As<Pawn>().ableToEnPassant && ((col>0 && board[row, col-1] is Pawn && board[row, col-1].Color != piece.Color) || (col<7&&board[row, col + 1] is Pawn && board[row, col + 1].Color != piece.Color)))
+                {
+					int direction = piece.Color == Color.White ? 2 : -2;
+					return ChessNotationConverter.convertCoordinateToFEN($"{row+direction}{col}");
+				}
+            }
+
+            return "-";
         }
     }
 }
