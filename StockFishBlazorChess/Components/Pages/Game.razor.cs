@@ -50,7 +50,6 @@ namespace StockFishBlazorChess.Components.Pages
 
             stockfish.setDifficulty(Convert.ToInt32(difficulty));
 
-            // Retrieve the unique GUID from local storage
             uniqueGuid = await localStorage.GetItemAsync<string>("uniqueGuid");
             gameKey = uniqueGuid + difficulty;
             isWhiteSide = string.Equals(side, "white");
@@ -69,22 +68,23 @@ namespace StockFishBlazorChess.Components.Pages
             bool isPromotion = Promotion.isPromotion(piece);
             char pieceValueChar = '_';
 
-			if (isPromotion)
+            if (isPromotion)
             {
                 pieceValueChar = await selectPromotionPiece();
             }
 
             chessGameService.movePiece(piece);
 
-            if(isPromotion)
+            if (isPromotion)
             {
 				Promotion.performPromotion(chessGameService, piece.Item!, pieceValueChar);
 				await InvokeAsync(StateHasChanged);
 			}
 
-            if (!chessGameService.pieceChanges.Last().isCheck && chessGameService.checkForStalemate())
+			// If the last move was not a check, check for a stalemate.
+			// Otherwise, check for checkmate.
+			if (!chessGameService.pieceChanges.Last().isCheck && chessGameService.checkForStalemate())
             {
-                chessGameService.pieceChanges.Last().isCheckmate = true;
                 await InvokeAsync(() => gameEndDialog("Stalemate!", true));
                 return;
             }
@@ -111,13 +111,19 @@ namespace StockFishBlazorChess.Components.Pages
             string nextMove = stockfish.getNextMove(boardFEN);
             Piece movedPiece = chessGameService._container.Items.First(x => x.Position == nextMove.Split(',')[0]);
             MudItemDropInfo<Piece> piece = new MudItemDropInfo<Piece>(movedPiece, nextMove.Split(',')[1], -1);
+
             chessGameService.movePiece(piece);
+
             if (nextMove.Length > 6) 
             {
+                // if nextMove length is bigger than 6 then there is a promotion value on the last character
+                // for example "a4,a6,q"
                 Promotion.performPromotion(chessGameService, piece.Item!, nextMove.Last());
-                await InvokeAsync(StateHasChanged);
             }
+
+            await InvokeAsync(StateHasChanged);
             chessGameService._container.Refresh();
+
             if (!chessGameService.pieceChanges.Last().isCheck && chessGameService.checkForStalemate())
             {
                 chessGameService.pieceChanges.Last().isCheckmate = true;
@@ -164,10 +170,9 @@ namespace StockFishBlazorChess.Components.Pages
                 return;
             }
 
-            // Join the new game
             Dictionary<string, List<string>> connectedPlayers = userHandler.getConnectedPlayers();
 
-            // Check if there are already connected players for the game
+            // Check if the game is already exist
             if (connectedPlayers.ContainsKey(gameKey))
             {
                 handleExistingPlayer(connectedPlayers, uniqueGuid);
@@ -192,8 +197,6 @@ namespace StockFishBlazorChess.Components.Pages
             // Check if the current player is already connected to the game
             if (connectedPlayers[gameKey].Contains(uniqueGuid))
             {
-                // The player is refreshing or renavigating
-                // Update the chessboard, pieces list, and player turn
                 chessGameService.chessBoard.board = matchManager.getMatchInfoBoard(gameKey);
                 chessGameService.pieceChanges = matchManager.getMatchInfoMoves(gameKey);
                 chessGameService.piecesOnBoard = chessGameService.chessBoard.board.Cast<Piece>().ToList();
@@ -209,8 +212,6 @@ namespace StockFishBlazorChess.Components.Pages
 
         private void handleNewPlayer(string uniqueGuid)
         {
-            // First player to connect to the game
-            // Create new entries for connected players and match information
             userHandler.addConnectedPlayer(gameKey, uniqueGuid);
 
             matchManager.addMatchInfo(gameKey);
@@ -241,14 +242,14 @@ namespace StockFishBlazorChess.Components.Pages
             navigationManager.NavigateTo("/");
         }
 
-        // Implementation of the IDisposable interface to perform cleanup when the object is disposed
         public void Dispose()
         {
-            // Update the match information with the current state of the chessboard
             stockfishService.stopEngine();
             if (!matchManager.getMatchInfos().ContainsKey(gameKey)) return;
             matchManager.setMatchInfoBoard(gameKey, chessGameService.chessBoard.board, chessGameService.whiteTurn);
             matchManager.setMatchInfoMoves(gameKey, chessGameService.pieceChanges, chessGameService.whiteTurn);
-        }
+
+			GC.SuppressFinalize(this);
+		}
     }
 }

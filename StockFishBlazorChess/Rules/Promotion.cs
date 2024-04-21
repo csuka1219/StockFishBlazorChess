@@ -19,7 +19,7 @@ namespace StockFishBlazorChess.Rules
         {
             Piece promotedPawn = chessGameService.piecesOnBoard.First(x => x == piece);
             (int row, int col) = piece.getPositionTuple();
-            switch (pieceChar)
+            switch (char.ToLower(pieceChar))
             {
                 case 'q':
                     chessGameService.chessBoard.board[row, col] = new Queen(piece.Color, piece.Color == Color.White ? PieceConstants.whiteQueenValue : PieceConstants.blackQueenValue, $"Images/{getColorChar(piece.Color)}Q.svg", new string(piece.Position));

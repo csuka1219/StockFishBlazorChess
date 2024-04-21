@@ -34,8 +34,6 @@ namespace StockFishBlazorChess.Utilities
                 return getCastlingFEN(pieceChange);
             }
 
-            bool isWhiteTurn = pieceChange.movedPieceValue < 12;
-
             string isCheckString = pieceChange.isCheck && !pieceChange.isCheckmate ? "+" : "";
 
             string isCheckmateString = pieceChange.isCheckmate ? "#" : "";
@@ -57,7 +55,7 @@ namespace StockFishBlazorChess.Utilities
 
         private static string getCastlingFEN(PieceChange pieceChange)
         {
-            if (pieceChange.fromMove.col > pieceChange.toMove.col) // moved left
+            if (pieceChange.fromMove.col > pieceChange.toMove.col) // moved left (long castle)
             {
                 return "O-O-O";
             }
